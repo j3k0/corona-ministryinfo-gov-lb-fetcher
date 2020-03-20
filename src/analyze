@@ -1,0 +1,52 @@
+#!/bin/bash -e
+cd "$(dirname "$0")/../data"
+cat data.txt |
+  awk -F\'\|\" '
+BEGIN{
+  tr["العدد اليومي"] = "daily_cases"
+  tr["العدد اﻹجمالي"] = "total_cases"
+  tr["العدد اليومي"] = "suspected_cases_in_quarantine"
+  tr["حالات نقلها الصليب اﻷحمر"] = "suspected_transported_by_red_cross"
+  tr["اصابات"] = "cases_monthly"
+  tr["حالات حجر"] = "quarantines_monthly"
+  tr["حالات منقولة الى المستشفى"] = "transfered_to_hospital"
+}
+
+/var cat_str/{
+  num_dates = 0
+  for (i in dates)
+    delete dates[i]
+}
+
+/cat_str.push/{
+  num_dates ++
+  dates[num_dates] = $2
+}
+
+/name:/{
+  name = tr[$2]
+}
+
+/data:/{
+  split($0, tokens, "\\[|\\]")
+  split(tokens[2], values, ",")
+  data_size[name] = num_dates
+  for (i = 1; i <= num_dates; ++i) {
+    data_dates[name,i] = dates[i]
+    data_values[name,i] = values[i]
+  }
+}
+
+END{
+  for (idx in tr) {
+    name = tr[idx]
+    filename = name ".csv"
+    print filename " exported"
+    printf "date,%s\n", name > filename
+    for (i = 1; i <= data_size[name]; ++i) {
+      printf "%s,%s\n", data_dates[name,i], data_values[name,i] > filename
+    }
+  }
+}
+'
+
