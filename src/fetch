@@ -1,4 +1,0 @@
-#!/bin/bash -e
-cd "$(dirname "$0")/../data"
-curl 'https://corona.ministryinfo.gov.lb/' \
-  | grep -E 'cat_str =|cat_str.push|data: |name: ' > data.txt

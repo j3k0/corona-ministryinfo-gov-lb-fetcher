@@ -1,0 +1,72 @@
+#!/bin/bash -e
+cd "$(dirname "$0")"
+
+curl 'https://corona.ministryinfo.gov.lb/' \
+  | grep -E 'cat_str =|cat_str.push|data: |name: ' \
+  | awk -F\'\|\" '
+
+BEGIN{
+  tr["العدد اليومي" "_1"] = "new_cases"
+  tr["العدد اﻹجمالي" "_1"] = "total_cases"
+  tr["العدد اليومي" "_2"] = "quarantined_cases"
+  tr["حالات نقلها الصليب اﻷحمر" "_1"] = "transported_by_red_cross"
+  tr["حالات منقولة الى المستشفى" "_1"] = "transfered_to_hospital"
+  # tr["اصابات"] = "cases_monthly"
+  # tr["حالات حجر"] = "quarantines_monthly"
+  num_columns = 0
+  for (id in tr) {
+    num_columns ++
+    columns[num_columns] = tr[id]
+  }
+}
+
+/var cat_str/{
+  num_dates = 0
+  for (i in dates) {
+    delete dates[i]
+  }
+}
+
+/cat_str.push/{
+  num_dates ++
+  dates[num_dates] = $2
+}
+
+/name:/{
+  num_names[$2] = 1 + num_names[$2]
+  name = tr[$2 "_" num_names[$2]]
+}
+
+/data:/{
+  if (name) {
+    split($0, tokens, "\\[|\\]")
+    split(tokens[2], values, ",")
+    for (i = 1; i <= num_dates; ++i) {
+      date = dates[i]
+      cmd = "date -f \"%d %B %Y\" -j \"" date "\" \"+%Y-%m-%d\" || echo FAIL"
+      cmd | getline date_std
+      close(cmd)
+      if (date_std != "FAIL") {
+        all_dates[date_std] = date_std
+        all_values[name "@" date_std] = values[i]
+      }
+    }
+  }
+}
+
+END{
+  printf "date"
+  for (idx in columns) {
+    printf "," columns[idx]
+  }
+  printf "\n"
+  for (date_std in all_dates) {
+    printf "%s", date_std
+    for (id in columns) {
+      name = columns[id]
+      printf ",%s", all_values[name "@" date_std]
+    }
+    printf "\n"
+  }
+}
+' > daily_data.csv 2>/dev/null
