@@ -10,7 +10,7 @@ BEGIN{
   tr["العدد اﻹجمالي" "_1"] = "total_cases"
   tr["العدد اليومي" "_2"] = "quarantined_cases"
   tr["حالات نقلها الصليب اﻷحمر" "_1"] = "transported_by_red_cross"
-  tr["حالات منقولة الى المستشفى" "_1"] = "transfered_to_hospital"
+  # tr["حالات منقولة الى المستشفى" "_1"] = "transfered_to_hospital"
   # tr["اصابات"] = "cases_monthly"
   # tr["حالات حجر"] = "quarantines_monthly"
   num_columns = 0
