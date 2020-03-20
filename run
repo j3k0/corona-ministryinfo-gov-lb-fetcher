@@ -69,4 +69,5 @@ END{
     printf "\n"
   }
 }
-' > daily_data.csv 2>/dev/null
+' 2>/dev/null \
+  | sort -n > daily_data.csv
