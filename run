@@ -29,8 +29,8 @@ BEGIN{
   split($0, tokens, ",")
   date_std = tokens[2]
   all_dates[date_std] = date_std
-  all_values["new_cases@" date_std] = tokens[3]
-  all_values["total_cases@" date_std] = tokens[4]
+  all_values["total_cases@" date_std] = tokens[3]
+  all_values["new_cases@" date_std] = tokens[4]
   all_values["quarantined_cases@" date_std] = tokens[5]
   all_values["transported_by_red_cross@" date_std] = tokens[6]
 }
