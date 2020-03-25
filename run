@@ -1,8 +1,13 @@
 #!/bin/bash -e
 cd "$(dirname "$0")"
 
+(
+
+cat daily_data_*.csv | awk '/20/{print "existing," $0}'
 curl 'https://corona.ministryinfo.gov.lb/' \
-  | grep -E 'cat_str =|cat_str.push|data: |name: ' \
+  | grep -E 'cat_str =|cat_str.push|data: |name: '
+
+) \
   | awk -F\'\|\" '
 
 BEGIN{
@@ -18,6 +23,16 @@ BEGIN{
     num_columns ++
     columns[num_columns] = tr[id]
   }
+}
+
+/^existing,/{
+  split($0, tokens, ",")
+  date_std = tokens[2]
+  all_dates[date_std] = date_std
+  all_values["new_cases@" date_std] = tokens[3]
+  all_values["total_cases@" date_std] = tokens[4]
+  all_values["quarantined_cases@" date_std] = tokens[5]
+  all_values["transported_by_red_cross@" date_std] = tokens[6]
 }
 
 /var cat_str/{
