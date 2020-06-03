@@ -1,12 +1,11 @@
 #!/bin/bash -e
 cd "$(dirname "$0")"
 
+curl 'https://corona.ministryinfo.gov.lb/' > tmp.out
+
 (
-
 cat daily_data_*.csv | awk '/20/{print "existing," $0}'
-curl 'https://corona.ministryinfo.gov.lb/' \
-  | grep -E 'cat_str =|cat_str.push|data: |name: '
-
+cat tmp.out | grep -E 'cat_str =|cat_str.push|data: |name: '
 ) \
   | awk -F\'\|\" '
 
@@ -86,3 +85,7 @@ END{
 }
 ' 2>/dev/null \
   | sort -n > daily_data.csv
+
+if [ $(date +%H) -gt 16 ]; then
+  echo "$(date +%Y-%m-%d),$(cat tmp.out | grep -A1 "حالات حجر" | tail -1 | cut -d[ -f2 | cut -d] -f1 )" >> per_casa.csv
+fi
