@@ -141,6 +141,6 @@ END{
 }
 
 DATA="$(per_district)"
-if ! grep "$DATA" per_district.csv; then
-  echo "$(date +%Y-%m-%d),$DATA" >> per_district.csv
+if ! grep "$DATA" cases_per_district.csv; then
+  echo "$(date +%Y-%m-%d),$DATA" >> cases_per_district.csv
 fi
