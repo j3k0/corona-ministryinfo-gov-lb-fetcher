@@ -1,6 +1,7 @@
 #!/bin/bash -e
 cd "$(dirname "$0")"
 
+
 curl 'https://corona.ministryinfo.gov.lb/' > tmp.out
 
 (
@@ -86,7 +87,60 @@ END{
 ' 2>/dev/null \
   | sort -n > daily_data.csv
 
+# cases per casa
 DATA="$(cat tmp.out | grep -A1 "حالات حجر" | tail -1 | cut -d[ -f2 | cut -d] -f1 )"
 if ! grep "$DATA" per_casa.csv; then
   echo "$(date +%Y-%m-%d),$DATA" >> per_casa.csv
+fi
+
+# Cases per district
+function per_district() {
+cat tmp.out | grep -A 10 -B 169 '#casesbydistricts' | awk '
+BEGIN {
+  num_district = 0
+}
+/cat_str.push/{
+  split($0, tokens, "'\''")
+  num_district ++
+  district[tokens[2]] = num_district
+}
+/data:/{
+  split($0, tokens0, "[")
+  split(tokens0[2], tokens1, "]")
+  split(tokens1[1], cases, ",")
+}
+END{
+  printf "%s,", cases[district["بيروت"]]
+  printf "%s,", cases[district["المتن"]]
+  printf "%s,", cases[district["بعبدا"]]
+  printf "%s,", cases[district["الشوف"]]
+  printf "%s,", cases[district["كسروان"]]
+  printf "%s,", cases[district["عكار"]]
+  printf "%s,", cases[district["زحلة"]]
+  printf "%s,", cases[district["بشري"]]
+  printf "%s,", cases[district["جبيل"]]
+  printf "%s,", cases[district["زغرتا"]]
+  printf "%s,", cases[district["صور"]]
+  printf "%s,", cases[district["عاليه"]]
+  printf "%s,", cases[district["طرابلس"]]
+  printf "%s,", cases[district["البترون"]]
+  printf "%s,", cases[district["الضنية"]]
+  printf "%s,", cases[district["صيدا"]]
+  printf "%s,", cases[district["النبطية"]]
+  printf "%s,", cases[district["بعلبك"]]
+  printf "%s,", cases[district["الكورة"]]
+  printf "%s,", cases[district["بنت جبيل"]]
+  printf "%s,", cases[district["مرجعيون"]]
+  printf "%s,", cases[district["البقاع الغربي"]]
+  printf "%s,", cases[district["جزين"]]
+  printf "%s,", cases[district["راشيا"]]
+  printf "%s,", cases[district["الهرمل"]]
+  printf "%s\n", cases[district["غير محدد"]]
+}
+'
+}
+
+DATA="$(per_district)"
+if ! grep "$DATA" per_district.csv; then
+  echo "$(date +%Y-%m-%d),$DATA" >> per_district.csv
 fi
