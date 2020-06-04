@@ -87,10 +87,10 @@ END{
 ' 2>/dev/null \
   | sort -n > daily_data.csv
 
-# cases per casa
+# quarantined per casa
 DATA="$(cat tmp.out | grep -A1 "حالات حجر" | tail -1 | cut -d[ -f2 | cut -d] -f1 )"
-if ! grep "$DATA" per_casa.csv; then
-  echo "$(date +%Y-%m-%d),$DATA" >> per_casa.csv
+if ! grep "$DATA" quarantined.csv; then
+  echo "$(date +%Y-%m-%d),$DATA" >> quarantined.csv
 fi
 
 # Cases per district
